@@ -16,13 +16,24 @@ USAGE:
 OPTIONS:
     -h, --help                          Print help information
     -m, --main-thread-wait <SECONDS>    Sets the refresh rate for the main thread in milliseconds
-    -u, --unix-thread-wait <SECONDS>    Sets the wait time for getting the Unix stream in
-                                        milliseconds
+    -u, --unix-thread-wait <SECONDS>    Sets the wait time for getting the Unix stream in milliseconds
 ```
 
-- Start rich presence refreshing songs every 2 seconds and getting the unix stream every 5 seconds
+#### Examples
+
+- Start rich presence with defaults
+``` 
+cmus-discord-rpc
+```
+
+- Start rich presence refreshing songs every 2 seconds,  getting the unix stream every 5 seconds
 ``` 
 cmus-discord-rpc -m 2000 -u 5000
+```
+
+- Start rich presence with default unix stream wait, refreshing songs every second redirecting output to /tmp/rpc-logfile
+``` 
+cmus-discord-rpc -m 1000 >/tmp/rpc-logfile
 ```
 
 ## Installing
