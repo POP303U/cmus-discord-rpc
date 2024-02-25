@@ -1,6 +1,6 @@
 # cmus-discord-rpc
 
-![Rust][github-actions-badge] [![Discord][discord-badge]][discord-invite]
+Fork of [Bond-009/cmus-discord-rpc](https://github.com/Bond-009/cmus-discord-rpc) including patches that are nice
 
 Discord Rich Presence integration for the C* Music Player (`cmus`).
 
@@ -12,15 +12,15 @@ Discord Rich Presence integration for the C* Music Player (`cmus`).
 
   Cloning using HTTPS:
 
-      git clone https://github.com/Bond-009/cmus-discord-rpc
+      git clone https://github.com/POP303U/cmus-discord-rpc
 
   Cloning using `ssh`:
 
-      git clone git@github.com:Bond-009/cmus-discord-rpc.git
+      git clone git@github.com:POP303U/cmus-discord-rpc.git
 
   Downloading an archive using `wget`:
 
-       wget https://github.com/Bond-009/cmus-discord-rpc/archive/master.zip
+       wget https://github.com/POP303U/cmus-discord-rpc/archive/master.zip
 
        unzip master.zip
 
@@ -66,7 +66,3 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see https://www.gnu.org/licenses/.
-
-[github-actions-badge]: https://github.com/Bond-009/cmus-discord-rpc/workflows/Rust/badge.svg
-[discord-badge]: https://discordapp.com/api/guilds/261241776105455618/widget.png
-[discord-invite]: https://discordapp.com/invite/thKXwJb
