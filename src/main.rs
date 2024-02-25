@@ -1,3 +1,4 @@
+use clap::ArgMatches;
 use std::fmt::{self, Debug, Display, Formatter};
 use std::io::{self, BufRead, BufReader, Write};
 use std::os::unix::net::UnixStream;
@@ -12,7 +13,7 @@ use discord_rpc_client::models::Activity;
 use discord_rpc_client::Client;
 
 use env_logger;
-use log::{debug, info};
+use log::{debug, info, warn};
 use regex::Regex;
 
 const DEFAULT_MAIN_THREAD_WAIT: u64 = 5000;
@@ -33,7 +34,6 @@ impl Display for Status {
 
 #[derive(Debug)]
 struct ParseStatusError;
-struct PresenceError;
 
 impl FromStr for Status {
     type Err = ParseStatusError;
@@ -48,14 +48,8 @@ impl FromStr for Status {
     }
 }
 
-impl fmt::Display for PresenceError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "[{}] Failed to set presence", "fail".red())
-    }
-}
-
-fn main() {
-    let matches = App::new("cmus-discord-rpc")
+fn cli() -> ArgMatches {
+    App::new("cmus-discord-rpc")
         .arg(
             Arg::with_name("main_thread_wait")
                 .short('m')
@@ -72,7 +66,29 @@ fn main() {
                 .help("Sets the wait time for getting the Unix stream in milliseconds")
                 .takes_value(true),
         )
-        .get_matches();
+        .arg(
+            Arg::with_name("verbose")
+                .short('v')
+                .long("verbose")
+                .help("Enable verbose output for debugging"),
+        )
+        .get_matches()
+}
+
+fn main() {
+    let matches = cli();
+
+    // If verbose is enabled set log level
+    let log_level = if matches.is_present("verbose") {
+        log::LevelFilter::Debug
+    } else {
+        log::LevelFilter::Info
+    };
+
+    env_logger::Builder::from_env(
+        env_logger::Env::default().default_filter_or(log_level.to_string()),
+    )
+    .init();
 
     // Parse arguments or use default values
     let main_thread_wait = matches
@@ -86,36 +102,30 @@ fn main() {
         .unwrap_or(DEFAULT_UNIX_THREAD_WAIT);
 
     if main_thread_wait == DEFAULT_MAIN_THREAD_WAIT {
-        println!(
-            "[{}] Using default refresh rate: {} milliseconds",
-            "info".yellow(),
+        warn!(
+            "Using default refresh rate: {} milliseconds",
             main_thread_wait
         );
     } else {
-        println!(
-            "[{}] Using custom refresh rate: {} milliseconds",
-            "info".yellow(),
+        info!(
+            "Using custom refresh rate: {} milliseconds",
             main_thread_wait
         );
     }
 
     if unix_thread_wait == DEFAULT_UNIX_THREAD_WAIT {
-        println!(
-            "[{}] Using default Unix stream wait: {} milliseconds",
-            "info".yellow(),
+        warn!(
+            "Using default Unix stream wait: {} milliseconds",
             unix_thread_wait
         );
     } else {
-        println!(
-            "[{}] Using custom Unix stream wait: {} milliseconds",
-            "info".yellow(),
+        info!(
+            "Using custom Unix stream wait: {} milliseconds",
             unix_thread_wait
         );
     }
 
-    env_logger::init();
-
-    info!("Starting cmus-discord-rpc...");
+    debug!("Starting cmus-discord-rpc...");
 
     let socket_path = get_socket_path();
     debug!("Using cmus socket {}", socket_path);
@@ -180,17 +190,15 @@ fn main() {
         }
 
         drpc.set_activity(|_| ac)
-            .unwrap_or_else(|_| panic!("{}", PresenceError));
+            .unwrap_or_else(|_| panic!("Failed to set Presence"));
 
-        print!(
-            "[{}] Successfully set discord-rpc x{}",
-            "ok".green(),
-            counter
-        );
-        let _ = io::stdout().flush(); // Flushing stdout should almost never result in an error
-        print!("\r");
+        info!("Successfully set discord-rpc x{}", counter);
 
         // PATCHED: use arguments from clap
+        debug!(
+            "Sleeping for length of main_thread_wait: {}",
+            main_thread_wait
+        );
         thread::sleep(Duration::from_millis(main_thread_wait));
     }
 }
@@ -202,6 +210,10 @@ fn get_unix_stream(socket_path: &str, unix_thread_wait: u64) -> UnixStream {
         }
 
         // PATCHED: use arguments from clap
+        debug!(
+            "Sleeping for length of unix_thread_wait: {}",
+            unix_thread_wait
+        );
         thread::sleep(Duration::from_millis(unix_thread_wait));
     }
 }
