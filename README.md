@@ -7,7 +7,7 @@ Discord Rich Presence integration for the C* Music Player (`cmus`).
 ## Usage
 
 - Help message
-```sh
+```
 cmus-discord-rpc 
 
 USAGE:
@@ -21,7 +21,7 @@ OPTIONS:
 ```
 
 - Start rich presence refreshing songs every 2 seconds and getting the unix stream every 5 seconds
-```sh 
+``` 
 cmus-discord-rpc -m 2000 -u 5000
 ```
 
