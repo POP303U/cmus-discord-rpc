@@ -1,6 +1,6 @@
 use clap::ArgMatches;
 use std::fmt::{self, Debug, Display, Formatter};
-use std::io::{self, BufRead, BufReader, Write};
+use std::io::{BufRead, BufReader, Write};
 use std::os::unix::net::UnixStream;
 use std::str::FromStr;
 use std::thread;
@@ -8,7 +8,6 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{env, u64};
 
 use clap::{App, Arg};
-use colored::*;
 use discord_rpc_client::models::Activity;
 use discord_rpc_client::Client;
 

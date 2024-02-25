@@ -14,7 +14,6 @@ panic = "abort"
 
 [dependencies]
 clap = "3.0"
-colored = "2"
 discord-rpc-client = "0.4"
 env_logger = "^0.10"
 log = "^0.4"
