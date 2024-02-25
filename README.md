@@ -31,7 +31,7 @@ cmus-discord-rpc
 cmus-discord-rpc -m 2000 -u 5000
 ```
 
-- Start rich presence with default unix stream wait, refreshing songs every second redirecting output to /tmp/rpc-logfile
+- Start rich presence with default unix stream wait, refreshing songs every second and redirecting output to /tmp/rpc-logfile
 ``` 
 cmus-discord-rpc -m 1000 >/tmp/rpc-logfile
 ```
