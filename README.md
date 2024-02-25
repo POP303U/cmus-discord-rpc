@@ -1,6 +1,6 @@
 # cmus-discord-rpc
 
-Fork of [Bond-009/cmus-discord-rpc](https://github.com/Bond-009/cmus-discord-rpc) including patches that are nice
+Fork of [Bond-009/cmus-discord-rpc](https://github.com/Bond-009/cmus-discord-rpc) including CLI tooling
 
 Discord Rich Presence integration for the C* Music Player (`cmus`).
 
