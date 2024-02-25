@@ -6,8 +6,8 @@ use std::str::FromStr;
 use std::thread;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use discord_rpc_client::Client;
 use discord_rpc_client::models::Activity;
+use discord_rpc_client::Client;
 
 use env_logger;
 use log::{debug, info};
@@ -17,7 +17,7 @@ use regex::Regex;
 enum Status {
     Playing,
     Paused,
-    Stopped
+    Stopped,
 }
 
 impl Display for Status {
@@ -37,7 +37,7 @@ impl FromStr for Status {
             "playing" => Ok(Status::Playing),
             "paused" => Ok(Status::Paused),
             "stopped" => Ok(Status::Stopped),
-            _ => Err(ParseStatusError)
+            _ => Err(ParseStatusError),
         }
     }
 }
@@ -66,12 +66,15 @@ fn main() {
         output.clear();
 
         // Read until an empty line
-        while reader.read_line(&mut output).unwrap() != 1 {};
+        while reader.read_line(&mut output).unwrap() != 1 {}
         debug!("Received\n{}", output);
 
-        let status = get_value(&output, "status").unwrap().parse::<Status>().unwrap();
-        let mut ac = Activity::new()
-                        .details(status.to_string());
+        let status = get_value(&output, "status")
+            .unwrap()
+            .parse::<Status>()
+            .unwrap();
+
+        let mut ac = Activity::new().details(status.to_string());
         if status != Status::Stopped {
             let artist = get_value(&output, "tag artist");
             let title = get_value(&output, "tag title");
@@ -81,24 +84,33 @@ fn main() {
                 let file_r = Regex::new(r"(?m)^file .+/(.+)\..+\n").unwrap();
                 match file_r.captures(&output) {
                     Some(v) => ac = ac.state(v.get(1).unwrap().as_str()),
-                    None => ac = ac.state("")
+                    None => ac = ac.state(""),
                 }
-            }
-            else {
+            } else {
                 ac = ac.state(artist.unwrap().to_owned() + " - " + title.unwrap());
             }
 
             if status == Status::Playing {
-                let duration = get_value(&output, "duration").unwrap().parse::<u64>().unwrap();
-                let position = get_value(&output, "position").unwrap().parse::<u64>().unwrap();
-                let sce = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+                let duration = get_value(&output, "duration")
+                    .unwrap()
+                    .parse::<u64>()
+                    .unwrap();
+                let position = get_value(&output, "position")
+                    .unwrap()
+                    .parse::<u64>()
+                    .unwrap();
+                let sce = SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs();
                 ac = ac.timestamps(|t| t.end(sce + duration - position));
             }
         }
 
         drpc.set_activity(|_| ac).expect("Failed to set presence");
 
-        thread::sleep(Duration::from_secs(15));
+        // PATCHED: I don't want 15 second delays when using rpc
+        thread::sleep(Duration::from_secs(3));
     }
 }
 
@@ -108,14 +120,13 @@ fn get_unix_stream(socket_path: &str) -> UnixStream {
             return s;
         }
 
-        // Try again in 15 seconds
-        thread::sleep(Duration::from_secs(15));
+        // PATCHED: Getting a UnixStream doesn't need to happen so irregularly
+        thread::sleep(Duration::from_secs(1));
     }
 }
 
 /// Get the path to the cmus socket the same way as cmus itself
-fn get_socket_path() -> String
-{
+fn get_socket_path() -> String {
     if let Ok(v) = env::var("CMUS_SOCKET") {
         return v;
     }
@@ -126,7 +137,7 @@ fn get_socket_path() -> String
 
     let cmus_config_dir = match env::var("XDG_CONFIG_HOME") {
         Ok(v) => v,
-        Err(_) => env::var("HOME").unwrap() + "/.config"
+        Err(_) => env::var("HOME").unwrap() + "/.config",
     } + "/cmus";
 
     cmus_config_dir + "/socket"
