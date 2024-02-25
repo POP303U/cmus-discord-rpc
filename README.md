@@ -1,6 +1,6 @@
 # cmus-discord-rpc
 
-Fork of [Bond-009/cmus-discord-rpc](https://github.com/Bond-009/cmus-discord-rpc) including CLI tooling
+Fork of [Bond-009/cmus-discord-rpc](https://github.com/Bond-009/cmus-discord-rpc) including nice
 
 Discord Rich Presence integration for the C* Music Player (`cmus`).
 
@@ -17,6 +17,7 @@ OPTIONS:
     -h, --help                          Print help information
     -m, --main-thread-wait <SECONDS>    Sets the refresh rate for the main thread in milliseconds
     -u, --unix-thread-wait <SECONDS>    Sets the wait time for getting the Unix stream in milliseconds
+    -v, --verbose                       Enable verbose output for debugging
 ```
 
 #### Examples
@@ -24,6 +25,11 @@ OPTIONS:
 - Start rich presence with defaults
 ``` 
 cmus-discord-rpc
+```
+
+- Start rich presence with defaults and verbose logging
+``` 
+cmus-discord-rpc -v
 ```
 
 - Start rich presence refreshing songs every 2 seconds,  getting the unix stream every 5 seconds
