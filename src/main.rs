@@ -1,17 +1,22 @@
-use std::env;
 use std::fmt::{self, Debug, Display, Formatter};
-use std::io::{BufRead, BufReader, Write};
+use std::io::{self, BufRead, BufReader, Write};
 use std::os::unix::net::UnixStream;
 use std::str::FromStr;
 use std::thread;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::{env, u64};
 
+use clap::{App, Arg};
+use colored::*;
 use discord_rpc_client::models::Activity;
 use discord_rpc_client::Client;
 
 use env_logger;
 use log::{debug, info};
 use regex::Regex;
+
+const DEFAULT_MAIN_THREAD_WAIT: u64 = 5000;
+const DEFAULT_UNIX_THREAD_WAIT: u64 = 15000;
 
 #[derive(PartialEq, Debug)]
 enum Status {
@@ -28,6 +33,7 @@ impl Display for Status {
 
 #[derive(Debug)]
 struct ParseStatusError;
+struct PresenceError;
 
 impl FromStr for Status {
     type Err = ParseStatusError;
@@ -42,23 +48,89 @@ impl FromStr for Status {
     }
 }
 
+impl fmt::Display for PresenceError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "[{}] Failed to set presence", "fail".red())
+    }
+}
+
 fn main() {
+    let matches = App::new("cmus-discord-rpc")
+        .arg(
+            Arg::with_name("main_thread_wait")
+                .short('m')
+                .long("main-thread-wait")
+                .value_name("SECONDS")
+                .help("Sets the refresh rate for the main thread in milliseconds")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("unix_thread_wait")
+                .short('u')
+                .long("unix-thread-wait")
+                .value_name("SECONDS")
+                .help("Sets the wait time for getting the Unix stream in milliseconds")
+                .takes_value(true),
+        )
+        .get_matches();
+
+    // Parse arguments or use default values
+    let main_thread_wait = matches
+        .value_of("main_thread_wait")
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(DEFAULT_MAIN_THREAD_WAIT);
+
+    let unix_thread_wait = matches
+        .value_of("unix_thread_wait")
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(DEFAULT_UNIX_THREAD_WAIT);
+
+    if main_thread_wait == DEFAULT_MAIN_THREAD_WAIT {
+        println!(
+            "[{}] Using default refresh rate: {} milliseconds",
+            "info".yellow(),
+            main_thread_wait
+        );
+    } else {
+        println!(
+            "[{}] Using custom refresh rate: {} milliseconds",
+            "info".yellow(),
+            main_thread_wait
+        );
+    }
+
+    if unix_thread_wait == DEFAULT_UNIX_THREAD_WAIT {
+        println!(
+            "[{}] Using default Unix stream wait: {} milliseconds",
+            "info".yellow(),
+            unix_thread_wait
+        );
+    } else {
+        println!(
+            "[{}] Using custom Unix stream wait: {} milliseconds",
+            "info".yellow(),
+            unix_thread_wait
+        );
+    }
+
     env_logger::init();
 
     info!("Starting cmus-discord-rpc...");
 
     let socket_path = get_socket_path();
     debug!("Using cmus socket {}", socket_path);
-    let mut stream = get_unix_stream(&socket_path);
+    let mut stream = get_unix_stream(&socket_path, unix_thread_wait);
     let mut drpc = Client::new(431179120836214795);
     drpc.start();
 
     let mut output = String::new();
+    let mut counter: u64 = 0;
 
     loop {
+        counter = counter + 1;
         if stream.write_all(b"status\n").is_err() {
             drpc.clear_activity().expect("Failed to clear presence");
-            stream = get_unix_stream(&socket_path);
+            stream = get_unix_stream(&socket_path, unix_thread_wait);
             continue;
         }
 
@@ -107,21 +179,30 @@ fn main() {
             }
         }
 
-        drpc.set_activity(|_| ac).expect("Failed to set presence");
+        drpc.set_activity(|_| ac)
+            .unwrap_or_else(|_| panic!("{}", PresenceError));
 
-        // PATCHED: I don't want 15 second delays when using rpc
-        thread::sleep(Duration::from_secs(3));
+        print!(
+            "[{}] Successfully set discord-rpc x{}",
+            "ok".green(),
+            counter
+        );
+        let _ = io::stdout().flush(); // Flushing stdout should almost never result in an error
+        print!("\r");
+
+        // PATCHED: use arguments from clap
+        thread::sleep(Duration::from_millis(main_thread_wait));
     }
 }
 
-fn get_unix_stream(socket_path: &str) -> UnixStream {
+fn get_unix_stream(socket_path: &str, unix_thread_wait: u64) -> UnixStream {
     loop {
         if let Ok(s) = UnixStream::connect(socket_path) {
             return s;
         }
 
-        // PATCHED: Getting a UnixStream doesn't need to happen so irregularly
-        thread::sleep(Duration::from_secs(1));
+        // PATCHED: use arguments from clap
+        thread::sleep(Duration::from_millis(unix_thread_wait));
     }
 }
 
