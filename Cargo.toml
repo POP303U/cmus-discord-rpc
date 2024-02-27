@@ -1,6 +1,6 @@
 [package]
 name = "cmus-discord-rpc"
-version = "0.2.0"
+version = "0.5.0"
 authors = ["POP303U <nicoanton.gering@gmail.com>"]
 description = "Displays the currently playing song from cmus in Discord using Rich Presence"
 keywords = ["discord", "rpc", "cmus"]
