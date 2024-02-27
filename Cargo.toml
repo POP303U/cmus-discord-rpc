@@ -1,10 +1,10 @@
 [package]
 name = "cmus-discord-rpc"
 version = "0.2.0"
-authors = ["Bond_009 <bond.009@outlook.com>"]
+authors = ["POP303U <nicoanton.gering@gmail.com>"]
 description = "Displays the currently playing song from cmus in Discord using Rich Presence"
 keywords = ["discord", "rpc", "cmus"]
-repository = "https://github.com/Bond-009/cmus-discord-rpc"
+repository = "https://github.com/POP303U/cmus-discord-rpc"
 edition = "2021"
 
 [profile.release]
