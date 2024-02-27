@@ -15,8 +15,26 @@ use env_logger;
 use log::{debug, info, warn};
 use regex::Regex;
 
-const DEFAULT_MAIN_THREAD_WAIT: u64 = 5000;
-const DEFAULT_UNIX_THREAD_WAIT: u64 = 15000;
+/*
+  Here can the configuration be edited,
+  if changes are made you need to recompile and
+  then restart cmus-discord-rpc with: `cargo install --path .`
+  and rerun cmus-discord-rpc
+*/
+
+const DEFAULT_MAIN_THREAD_WAIT: u64 = 5000; /* Dont touch, use -m flag with arguments instead */
+const DEFAULT_UNIX_THREAD_WAIT: u64 = 15000; /* Dont touch, use -u flag with arguments instead */
+const ARTIST_SONG_SEPERATOR: &str = " | "; /* Seperator used for Artist and Song */
+const APPLICATION_ID: u64 = 1212098714341089433; /* Application ID */
+const IMAGE_NAME_LARGE: &str = "silly_plushie"; /* Image name uploaded to the application id used for displaying the large image */
+const IMAGE_NAME_SMALL: &str = "melon_pult"; /* Image name uploaded to the application id used for displaying the small image */
+const IMAGE_TEXT_LARGE: &str = "🧊 cold plushie 🧊"; /* Tooltip for the big image if it exists */
+const IMAGE_TEXT_SMALL: &str = "🍉 silly plushie 🍉"; /* Tooltip for the small image if it exists */
+const EXTRA_1: &str = " | emi is silly :3"; /* Extra string 1, will be appended after the song name */
+const EXTRA_2: &str = ""; /* Extra string 2, will be appended after the song name */
+const EXTRA_3: &str = ""; /* Extra string 3, will be appended after the song name */
+
+/* End of configs */
 
 #[derive(PartialEq, Debug)]
 enum Status {
@@ -75,6 +93,7 @@ fn cli() -> ArgMatches {
 }
 
 fn main() {
+    // get cli arguments
     let matches = cli();
 
     // If verbose is enabled set log level
@@ -100,28 +119,33 @@ fn main() {
         .and_then(|s| s.parse().ok())
         .unwrap_or(DEFAULT_UNIX_THREAD_WAIT);
 
-    if main_thread_wait == DEFAULT_MAIN_THREAD_WAIT {
-        warn!(
+    match main_thread_wait {
+        DEFAULT_MAIN_THREAD_WAIT => warn!(
             "Using default refresh rate: {} milliseconds",
             main_thread_wait
-        );
-    } else {
-        info!(
-            "Using custom refresh rate: {} milliseconds",
-            main_thread_wait
-        );
+        ),
+        _ => {
+            info!(
+                "Using custom refresh rate: {} milliseconds",
+                main_thread_wait
+            );
+            if main_thread_wait < 3000 {
+                warn!("Refresh rates under 3000 milliseconds may desync the time left randomly!");
+            }
+        }
     }
 
-    if unix_thread_wait == DEFAULT_UNIX_THREAD_WAIT {
-        warn!(
+    match unix_thread_wait {
+        DEFAULT_UNIX_THREAD_WAIT => warn!(
             "Using default Unix stream wait: {} milliseconds",
-            unix_thread_wait
-        );
-    } else {
-        info!(
-            "Using custom Unix stream wait: {} milliseconds",
-            unix_thread_wait
-        );
+            unix_thread_wait,
+        ),
+        _ => {
+            info!(
+                "Using custom Unix stream wait: {} milliseconds",
+                unix_thread_wait
+            );
+        }
     }
 
     debug!("Starting cmus-discord-rpc...");
@@ -129,7 +153,7 @@ fn main() {
     let socket_path = get_socket_path();
     debug!("Using cmus socket {}", socket_path);
     let mut stream = get_unix_stream(&socket_path, unix_thread_wait);
-    let mut drpc = Client::new(431179120836214795);
+    let mut drpc = Client::new(APPLICATION_ID);
     drpc.start();
 
     let mut output = String::new();
@@ -168,7 +192,22 @@ fn main() {
                     None => ac = ac.state(""),
                 }
             } else {
-                ac = ac.state(artist.unwrap().to_owned() + " - " + title.unwrap());
+                ac = ac
+                    .assets(|assets| {
+                        { assets }
+                            .large_image(IMAGE_NAME_LARGE)
+                            .small_image(IMAGE_NAME_SMALL)
+                            .small_text(IMAGE_TEXT_SMALL)
+                            .large_text(IMAGE_TEXT_LARGE)
+                    })
+                    .state(
+                        artist.unwrap().to_owned()
+                            + ARTIST_SONG_SEPERATOR
+                            + title.unwrap()
+                            + EXTRA_1
+                            + EXTRA_2
+                            + EXTRA_3,
+                    )
             }
 
             if status == Status::Playing {
