@@ -22,17 +22,17 @@ use regex::Regex;
   and rerun cmus-discord-rpc
 */
 
-const DEFAULT_MAIN_THREAD_WAIT: u64 = 5000; /* Dont touch, use -m flag with arguments instead */
-const DEFAULT_UNIX_THREAD_WAIT: u64 = 15000; /* Dont touch, use -u flag with arguments instead */
-const ARTIST_SONG_SEPERATOR: &str = " | "; /* Seperator used for Artist and Song */
-const APPLICATION_ID: u64 = 1212098714341089433; /* Application ID */
-const IMAGE_NAME_LARGE: &str = "silly_plushie"; /* Image name uploaded to the application id used for displaying the large image */
-const IMAGE_NAME_SMALL: &str = "melon_pult"; /* Image name uploaded to the application id used for displaying the small image */
-const IMAGE_TEXT_LARGE: &str = "🧊 cold plushie 🧊"; /* Tooltip for the big image if it exists */
-const IMAGE_TEXT_SMALL: &str = "🍉 silly plushie 🍉"; /* Tooltip for the small image if it exists */
-const EXTRA_1: &str = " | emi is silly :3"; /* Extra string 1, will be appended after the song name */
-const EXTRA_2: &str = ""; /* Extra string 2, will be appended after the song name */
-const EXTRA_3: &str = ""; /* Extra string 3, will be appended after the song name */
+const DEFAULT_MAIN_THREAD_WAIT: u64 = 5000; /* NEEDED: Dont touch, use -m flag with arguments instead or default */
+const DEFAULT_UNIX_THREAD_WAIT: u64 = 15000; /* NEEDED:  Dont touch, use -u flag with arguments instead or default */
+const ARTIST_SONG_SEPERATOR: &str = "|"; /* NEEDED: Seperator used for Artist and Song */
+const APPLICATION_ID: u64 = 1212098714341089433; /* NEEDED: Application ID, don't change if you don't need any custom images */
+const IMAGE_NAME_LARGE: &str = "silly_plushie"; /* OPTIONAL: Image name uploaded to the application id used for displaying the large image */
+const IMAGE_NAME_SMALL: &str = "melon_pult"; /* OPTIONAL: Image name uploaded to the application id used for displaying the small image */
+const IMAGE_TEXT_LARGE: &str = "🧊 cold plushie 🧊"; /* OPTIONAL: Tooltip for the big image if it exists */
+const IMAGE_TEXT_SMALL: &str = "🍉 silly plushie 🍉"; /* OPTIONAL: Tooltip for the small image if it exists */
+const EXTRA_1: &str = " | emi is silly :3"; /* OPTIONAL: Extra string 1, will be appended after the song name */
+const EXTRA_2: &str = ""; /* OPTIONAL: Extra string 2, will be appended after the song name */
+const EXTRA_3: &str = ""; /* OPTIONAL: Extra string 3, will be appended after the song name */
 
 /* End of configs */
 
@@ -202,7 +202,9 @@ fn main() {
                     })
                     .state(
                         artist.unwrap().to_owned()
+                            + " "
                             + ARTIST_SONG_SEPERATOR
+                            + " "
                             + title.unwrap()
                             + EXTRA_1
                             + EXTRA_2
