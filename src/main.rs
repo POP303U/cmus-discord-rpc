@@ -31,8 +31,8 @@ const IMAGE_NAME_SMALL: &str = "melon_pult"; /* OPTIONAL: Image name uploaded to
 const IMAGE_TEXT_LARGE: &str = "🧊 cold plushie 🧊"; /* OPTIONAL: Tooltip for the big image if it exists */
 const IMAGE_TEXT_SMALL: &str = "🍉 silly plushie 🍉"; /* OPTIONAL: Tooltip for the small image if it exists */
 const EXTRA_1: &str = " | emi is silly :3"; /* OPTIONAL: Extra string 1, will be appended after the song name */
-const EXTRA_2: &str = ""; /* OPTIONAL: Extra string 2, will be appended after the song name */
-const EXTRA_3: &str = ""; /* OPTIONAL: Extra string 3, will be appended after the song name */
+const EXTRA_2: &str = ""; /* OPTIONAL: Extra string 2, will be appended after EXTRA_1 */
+const EXTRA_3: &str = ""; /* OPTIONAL: Extra string 3, will be appended after EXTRA_2 */
 
 /* End of configs */
 
@@ -189,36 +189,33 @@ fn main() {
                 let file_r = Regex::new(r"(?m)^file .+/(.+)\..+\n").unwrap();
                 match file_r.captures(&output) {
                     Some(v) => {
-                        ac = ac.state(v.get(1).unwrap().as_str()).assets(|assets| {
-                            { assets }
-                                .large_image(IMAGE_NAME_LARGE)
-                                .small_image(IMAGE_NAME_SMALL)
-                                .small_text(IMAGE_TEXT_SMALL)
-                                .large_text(IMAGE_TEXT_LARGE)
-                        })
+                        ac = ac.state(
+                            v.get(1).unwrap().as_str().to_owned() + EXTRA_1 + EXTRA_2 + EXTRA_3,
+                        )
                     }
                     None => ac = ac.state(""),
                 }
             } else {
-                ac = ac
-                    .assets(|assets| {
-                        { assets }
-                            .large_image(IMAGE_NAME_LARGE)
-                            .small_image(IMAGE_NAME_SMALL)
-                            .small_text(IMAGE_TEXT_SMALL)
-                            .large_text(IMAGE_TEXT_LARGE)
-                    })
-                    .state(
-                        artist.unwrap().to_owned()
-                            + " "
-                            + ARTIST_SONG_SEPERATOR
-                            + " "
-                            + title.unwrap()
-                            + EXTRA_1
-                            + EXTRA_2
-                            + EXTRA_3,
-                    )
+                ac = ac.state(
+                    artist.unwrap().to_owned()
+                        + " "
+                        + ARTIST_SONG_SEPERATOR
+                        + " "
+                        + title.unwrap()
+                        + EXTRA_1
+                        + EXTRA_2
+                        + EXTRA_3,
+                )
             }
+
+            // Add configs to all types of outcomes
+            ac = ac.assets(|assets| {
+                { assets }
+                    .large_image(IMAGE_NAME_LARGE)
+                    .small_image(IMAGE_NAME_SMALL)
+                    .small_text(IMAGE_TEXT_SMALL)
+                    .large_text(IMAGE_TEXT_LARGE)
+            });
 
             if status == Status::Playing {
                 let duration = get_value(&output, "duration")
