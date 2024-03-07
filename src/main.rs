@@ -188,7 +188,15 @@ fn main() {
                 // Capture filename
                 let file_r = Regex::new(r"(?m)^file .+/(.+)\..+\n").unwrap();
                 match file_r.captures(&output) {
-                    Some(v) => ac = ac.state(v.get(1).unwrap().as_str()),
+                    Some(v) => {
+                        ac = ac.state(v.get(1).unwrap().as_str()).assets(|assets| {
+                            { assets }
+                                .large_image(IMAGE_NAME_LARGE)
+                                .small_image(IMAGE_NAME_SMALL)
+                                .small_text(IMAGE_TEXT_SMALL)
+                                .large_text(IMAGE_TEXT_LARGE)
+                        })
+                    }
                     None => ac = ac.state(""),
                 }
             } else {
