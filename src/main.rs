@@ -26,13 +26,13 @@ const DEFAULT_MAIN_THREAD_WAIT: u64 = 5000; /* NEEDED: Dont touch, use -m flag w
 const DEFAULT_UNIX_THREAD_WAIT: u64 = 15000; /* NEEDED:  Dont touch, use -u flag with arguments instead or default */
 const ARTIST_SONG_SEPERATOR: &str = "|"; /* NEEDED: Seperator used for Artist and Song */
 const APPLICATION_ID: u64 = 1212098714341089433; /* NEEDED: Application ID, don't change if you don't need any custom images */
-const IMAGE_NAME_LARGE: &str = "take_control"; /* OPTIONAL: Image name uploaded to the application id used for displaying the large image */
+const IMAGE_NAME_LARGE: &str = "ignorance"; /* OPTIONAL: Image name uploaded to the application id used for displaying the large image */
 const IMAGE_NAME_SMALL: &str = "none"; /* OPTIONAL: Image name uploaded to the application id used for displaying the small image */
-const IMAGE_TEXT_LARGE: &str = "// マテリアルデザイン //"; /* OPTIONAL: Tooltip for the big image if it exists */
-const IMAGE_TEXT_SMALL: &str = ""; /* OPTIONAL: Tooltip for the small image if it exists */
-const EXTRA_1: &str = " | emi is silly :3"; /* OPTIONAL: Extra string 1, will be appended after the song name */
-const EXTRA_2: &str = ""; /* OPTIONAL: Extra string 2, will be appended after EXTRA_1 */
-const EXTRA_3: &str = ""; /* OPTIONAL: Extra string 3, will be appended after EXTRA_2 */
+const IMAGE_TEXT_LARGE: &str = "// to be ignorant is to be free //"; /* OPTIONAL: Tooltip for the big image if it exists */
+const IMAGE_TEXT_SMALL: &str = "wishes"; /* OPTIONAL: Tooltip for the small image if it exists */
+const EXTRA_1: &str = " "; /* OPTIONAL: Extra string 1, will be appended after the song name */
+const EXTRA_2: &str = " "; /* OPTIONAL: Extra string 2, will be appended after EXTRA_1 */
+const EXTRA_3: &str = " "; /* OPTIONAL: Extra string 3, will be appended after EXTRA_2 */
 
 /* End of configs */
 
@@ -280,7 +280,6 @@ fn get_socket_path() -> String {
 
     cmus_config_dir + "/socket"
 }
-
 fn get_value<'t>(input: &'t str, key: &str) -> Option<&'t str> {
     let re = Regex::new(&format!("(?m)^{} (.+)$", key)).unwrap();
 
